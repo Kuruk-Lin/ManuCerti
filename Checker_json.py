@@ -1,7 +1,11 @@
 import json
-import re
-import sys
-import pyperclip
+try:
+    import pyperclip
+except ImportError:
+    import subprocess
+    subprocess.getoutput(f"pip install pyperclip")
+finally:
+    import pyperclip
 
 
 class JChecker:
@@ -9,6 +13,7 @@ class JChecker:
         self.file_name = "TestFile.json"
         self.file_output = "TestFile_roll_out.json"
         self.tmp_name = "tmp.json"
+        self.blank = "\n\t\t"
         self.keyword_list = ["\\n", " ", "\\\\\\", "\\", "|"]
         self.replace_list = ['', '', "|", '', "\\\\\\"]
 
@@ -16,20 +21,16 @@ class JChecker:
         with open(self.file_name, "r") as file:
             try:
                 dict(json.load(file))
+            #   Expected is error json
             except:
                 file.close()
                 with open(self.file_name, "r") as trs:
                     with open(self.file_output, "w") as roll_out:
-                        x = trs.read()
-                        if x[0] == "\"" and x[-1] == "\"":
-                            x = x[1:-1]
-                        elif x[0] == "\"" and x[-1] != "\"":
-                            x = x[1:]
-                        elif x[0] != "\"" and x[-1] == "\"":
-                            x = x[:-1]
+                        raw_data = trs.read()
+                        raw_json = raw_data[raw_data.find("{"):raw_data.rfind("}") + 1]
                         for raw, target in zip(self.keyword_list, self.replace_list):
-                            x = x.replace(raw, target)
-                        roll_out.write(x)
+                            raw_json = raw_json.replace(raw, target)
+                        roll_out.write(raw_json)
                         roll_out.close()
                         trs.close()
 
@@ -52,7 +53,7 @@ class JChecker:
                 with open(self.tmp_name, "w") as write_out:
                     write_out.write(json.dumps(temp, indent=2, sort_keys=True))
                     write_out.close()
-                print(f"Response data:\n\t\tDevice ID: {device_Id}\n\t\tRequest ID: {requestId}")
+                print(f"Response data:{self.blank}Device ID: {device_Id}{self.blank}Request ID: {requestId}")
             elif al_keys.get("inputs") is not None:
                 device_Id = dict(list(
                     dict(dict(dict(list(al_keys.get("inputs"))[0]).get("payload")).get("commands")[0]).get(
@@ -62,7 +63,7 @@ class JChecker:
                 with open(self.tmp_name, "w") as write_out:
                     write_out.write(json.dumps(temp, indent=2, sort_keys=True))
                     write_out.close()
-                print(f"Response data:\n\t\tDevice ID: {device_Id}\n\t\tRequest ID: {requestId}")
+                print(f"Response data:{self.blank}Device ID: {device_Id}{self.blank}Request ID: {requestId}")
             elif al_keys.get("payload") is not None:
                 try:
                     device_Id = dict(list(dict(al_keys.get("payload")).get("commands"))[0]).get('ids')[0]
@@ -73,8 +74,9 @@ class JChecker:
                 with open(self.tmp_name, "r") as checker:
                     previous_data = dict(json.load(checker))
                     checker.close()
-                print(f"Response data:\n\t\tDevice ID: {device_Id}\n\t\tRequest ID: {requestId}")
-                print(f"Device ID & Request ID:\n\t\tPostData: {previous_data}\n\t\tResponseData: {temp}\n\t\tResult: {dict(temp) == previous_data}")
+                print(f"Response data:{self.blank}Device ID: {device_Id}{self.blank}Request ID: {requestId}")
+                print(f"Device ID & Request ID:{self.blank}Request Data: {previous_data}{self.blank}Response Data: {temp}"
+                      f"{self.blank}Result: {dict(temp) == previous_data}")
             else:
                 print("No data found.")
         files.close()
