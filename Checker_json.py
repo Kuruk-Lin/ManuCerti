@@ -17,6 +17,11 @@ class JChecker:
         self.keyword_list = ["\\n", " ", "\\\\\\", "\\", "|"]
         self.replace_list = ['', '', "|", '', "\\\\\\"]
 
+    def m_proc(self):
+        self.load()
+        self.format_js()
+        self.checker()
+
     def load(self):
         with open(self.file_name, "r") as file:
             try:
@@ -83,6 +88,4 @@ class JChecker:
 
 
 if __name__ == '__main__':
-    JChecker().load()
-    JChecker().format_js()
-    JChecker().checker()
+    JChecker().m_proc()
