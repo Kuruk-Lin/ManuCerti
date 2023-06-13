@@ -27,4 +27,4 @@ class PPC:
 
 
 if __name__ == '__main__':
-    PPC(target_url="https://www.iguzzini.com/privacy-statement/").m_proc()
+    PPC(target_url="").m_proc()
