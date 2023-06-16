@@ -22,5 +22,6 @@ class GHABasic:
     def power_key(self):
         print(self.device.current_app())
 
+
 if __name__ == '__main__':
     GHABasic().power_key()
